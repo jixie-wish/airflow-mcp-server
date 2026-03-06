@@ -1,9 +1,9 @@
 # airflow-mcp-plugin
 
-Airflow 3 plugin that mounts `airflow-mcp-server` as a Streamable HTTP endpoint at `/mcp` on the Airflow API server.
+Plugin that mounts MCP as a Streamable HTTP endpoint at `/mcp` on the Airflow API server. Supports **Airflow 2** (Flask) and **Airflow 3** (FastAPI).
 
 Requirements:
-- Apache Airflow >= 3.0 (FastAPI backend)
+- Apache Airflow >= 2.4 (2.x: Flask blueprint at `/mcp`; 3.x: FastAPI mount at `/mcp`)
 - Python >= 3.10
 
 Install (recommended via main package extra):
