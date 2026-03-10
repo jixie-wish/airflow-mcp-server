@@ -1,7 +1,7 @@
 [project]
 name = "airflow-mcp-plugin"
 version = "0.2.0"
-description = "Apache Airflow 2/3 plugin that mounts MCP as a Streamable HTTP endpoint at /mcp"
+description = "Apache Airflow 3 plugin that mounts airflow-mcp-server as a Streamable HTTP endpoint at /mcp"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -15,7 +15,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
-  "apache-airflow>=2.4",
+  "apache-airflow>=3.0.2",
   "aiohttp>=3.9.5",
   "mcp>=1.16.0",
   "pydantic>=2.7",

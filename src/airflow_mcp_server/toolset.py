@@ -133,9 +133,11 @@ class AirflowOpenAPIToolset:
         _, details = self.get_tool(name)
         request = self._prepare_request(details, arguments or {})
 
+        # Path without leading slash so it is relative to base_url (preserves /api/v1/ etc.)
+        path = request.path.lstrip("/")
         async with self._session.request(
             details.method,
-            request.path,
+            path,
             params=request.query or None,
             json=request.body,
         ) as response:
