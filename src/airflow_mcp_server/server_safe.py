@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from contextlib import asynccontextmanager
 from typing import Any, Literal, cast
 
@@ -57,14 +58,23 @@ async def _serve_airflow(
     if not config.auth_token:
         raise ValueError("auth_token is required")
 
+    # Support Basic auth when auth_token is "username:password" (e.g. Airflow 2.x without /auth/token)
+    if ":" in config.auth_token:
+        user, _, password = config.auth_token.partition(":")
+        basic = base64.b64encode(f"{user}:{password}".encode()).decode()
+        auth_headers = {"Authorization": f"Basic {basic}"}
+    else:
+        auth_headers = {"Authorization": f"Bearer {config.auth_token}"}
+
     session = aiohttp.ClientSession(
         base_url=config.base_url,
-        headers={"Authorization": f"Bearer {config.auth_token}"},
+        headers=auth_headers,
         timeout=aiohttp.ClientTimeout(total=30),
     )
 
     try:
-        async with session.get("/openapi.json") as response:
+        # Relative path so base_url path is kept (e.g. .../api/v1/ + openapi.json -> .../api/v1/openapi.json)
+        async with session.get("openapi.json") as response:
             response.raise_for_status()
             openapi_spec = await response.json()
 

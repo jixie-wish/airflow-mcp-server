@@ -15,9 +15,10 @@ class AirflowConfig:
         Raises:
             ValueError: If required configuration is missing
         """
-        self.base_url = base_url
-        if not self.base_url:
+        if not base_url or not base_url.strip():
             raise ValueError("Missing required configuration: base_url")
+        # aiohttp requires base_url to end with '/' (e.g. http://localhost:9080/api/v1/)
+        self.base_url = base_url.strip().rstrip("/") + "/"
 
         self.auth_token = auth_token
         if not self.auth_token:

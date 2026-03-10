@@ -129,13 +129,15 @@ class AirflowOpenAPIToolset:
         self,
         name: str,
         arguments: dict[str, Any],
-    ) -> list[types.TextContent] | tuple[list[types.TextContent], dict[str, Any]]:
+    ) -> list[types.TextContent]:
         _, details = self.get_tool(name)
         request = self._prepare_request(details, arguments or {})
 
+        # Path without leading slash so it is relative to base_url (preserves /api/v1/ etc.)
+        path = request.path.lstrip("/")
         async with self._session.request(
             details.method,
-            request.path,
+            path,
             params=request.query or None,
             json=request.body,
         ) as response:
@@ -148,13 +150,15 @@ class AirflowOpenAPIToolset:
 
             if "application/json" in content_type.lower():
                 if not body:
-                    return ([], {})
+                    return [types.TextContent(type="text", text="{}")]
                 try:
                     parsed = json.loads(body.decode("utf-8"))
                 except json.JSONDecodeError:
                     text = body.decode("utf-8", errors="replace")
                     return [types.TextContent(type="text", text=text)]
-                return ([], parsed)
+                # Return JSON as text so MCP clients (e.g. Cursor) can display it; previously ([], parsed) showed empty
+                text = json.dumps(parsed, indent=2, ensure_ascii=False, default=str)
+                return [types.TextContent(type="text", text=text)]
 
             text = body.decode("utf-8", errors="replace")
             return [types.TextContent(type="text", text=text)]
